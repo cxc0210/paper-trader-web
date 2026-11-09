@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Pagination,
   PaginationContent,
@@ -27,12 +28,24 @@ import {
 } from "@/components/ui/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getErrorMessage } from "@/lib/api-error";
-import { createUser, deleteUser, listUsers, updateUser, type CurrentUser, type UserPage } from "@/services/user";
+import { createUser, deleteUser, listUsers, updateUser, type CurrentUser, type UserPage, type UserRole } from "@/services/user";
 
 const PAGE_SIZE = 10;
 
-const EMPTY_CREATE_FORM = { username: "", email: "", phone: "", password: "" };
-const EMPTY_EDIT_FORM = { username: "", email: "", phone: "" };
+const EMPTY_CREATE_FORM: { username: string; email: string; phone: string; password: string; role: UserRole } = {
+  username: "",
+  email: "",
+  phone: "",
+  password: "",
+  role: "USER",
+};
+const EMPTY_EDIT_FORM: { username: string; email: string; phone: string; role: UserRole } = {
+  username: "",
+  email: "",
+  phone: "",
+  role: "USER",
+};
+const ROLE_LABELS: Record<UserRole, string> = { ADMIN: "管理员", USER: "普通用户" };
 
 function getPaginationItems(currentPage: number, totalPages: number) {
   const pages = new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1]);
@@ -137,7 +150,7 @@ export default function UserPage() {
 
   function openEditDialog(user: CurrentUser) {
     setEditingUser(user);
-    setEditForm({ username: user.username, email: user.email, phone: user.phone ?? "" });
+    setEditForm({ username: user.username, email: user.email, phone: user.phone ?? "", role: user.role });
     setEditError("");
   }
 
@@ -163,6 +176,7 @@ export default function UserPage() {
         username: editForm.username.trim(),
         email: editForm.email.trim(),
         phone: editForm.phone.trim() || null,
+        role: editForm.role,
       });
       setEditingUser(null);
       setEditForm(EMPTY_EDIT_FORM);
@@ -227,19 +241,20 @@ export default function UserPage() {
                   <TableHead className="px-5 text-xs text-slate-500">用户</TableHead>
                   <TableHead className="px-5 text-xs text-slate-500">邮箱</TableHead>
                   <TableHead className="px-5 text-xs text-slate-500">手机号</TableHead>
+                  <TableHead className="px-5 text-xs text-slate-500">角色</TableHead>
                   <TableHead className="w-28 px-5 text-right text-xs text-slate-500">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-80 text-center text-slate-500">
+                    <TableCell colSpan={6} className="h-80 text-center text-slate-500">
                       正在加载用户列表…
                     </TableCell>
                   </TableRow>
                 ) : users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-80 text-center text-slate-500">
+                    <TableCell colSpan={6} className="h-80 text-center text-slate-500">
                       暂无用户数据
                     </TableCell>
                   </TableRow>
@@ -250,6 +265,11 @@ export default function UserPage() {
                       <TableCell className="px-5 font-medium text-slate-800">{user.username}</TableCell>
                       <TableCell className="px-5 text-slate-600">{user.email}</TableCell>
                       <TableCell className="px-5 text-slate-500">{user.phone || "--"}</TableCell>
+                      <TableCell className="px-5">
+                        <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${user.role === "ADMIN" ? "bg-indigo-50 text-indigo-700" : "bg-slate-100 text-slate-600"}`}>
+                          {ROLE_LABELS[user.role]}
+                        </span>
+                      </TableCell>
                       <TableCell className="px-5">
                         <div className="flex justify-end gap-1">
                           <Button type="button" variant="ghost" size="icon-sm" aria-label={`编辑 ${user.username}`} title="编辑用户" onClick={() => openEditDialog(user)}>
@@ -391,6 +411,18 @@ export default function UserPage() {
                   required
                 />
               </label>
+              <label className="space-y-2 sm:col-span-2">
+                <span className="text-sm font-medium text-slate-700">角色</span>
+                <Select value={createForm.role} onValueChange={(role) => setCreateForm((form) => ({ ...form, role: role as UserRole }))}>
+                  <SelectTrigger className="h-10 w-full bg-white">
+                    <span>{ROLE_LABELS[createForm.role]}</span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USER">普通用户</SelectItem>
+                    <SelectItem value="ADMIN">管理员</SelectItem>
+                  </SelectContent>
+                </Select>
+              </label>
             </div>
 
             {createError && <p className="mt-4 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700">{createError}</p>}
@@ -448,6 +480,18 @@ export default function UserPage() {
                   onChange={(event) => setEditForm((form) => ({ ...form, email: event.target.value }))}
                   required
                 />
+              </label>
+              <label className="space-y-2 sm:col-span-2">
+                <span className="text-sm font-medium text-slate-700">角色</span>
+                <Select value={editForm.role} onValueChange={(role) => setEditForm((form) => ({ ...form, role: role as UserRole }))}>
+                  <SelectTrigger className="h-10 w-full bg-white">
+                    <span>{ROLE_LABELS[editForm.role]}</span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USER">普通用户</SelectItem>
+                    <SelectItem value="ADMIN">管理员</SelectItem>
+                  </SelectContent>
+                </Select>
               </label>
             </div>
 

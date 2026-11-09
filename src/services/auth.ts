@@ -1,4 +1,5 @@
 import { http } from "@/lib/http";
+import type { CurrentUser } from "@/services/user";
 
 type LoginReq = {
   email: string;
@@ -8,6 +9,7 @@ type LoginReq = {
 type LoginRes = {
   tokenExpiresAt: string;
   idleExpiresAt: string;
+  user: CurrentUser;
 };
 
 type ChangePasswordRequest = {

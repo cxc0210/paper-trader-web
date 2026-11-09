@@ -24,7 +24,7 @@ import { logout } from "@/services/auth";
 import { getCurrentUser, type CurrentUser } from "@/services/user";
 
 const navigation = [
-  { href: "/user", label: "用户管理", icon: Users },
+  { href: "/user", label: "用户管理", icon: Users, adminOnly: true },
   { href: "/transaction", label: "交易记录", icon: ArrowLeftRight },
 ];
 
@@ -83,7 +83,7 @@ export function UserSidebar() {
 
   return (
     <aside className="flex h-svh w-64 shrink-0 flex-col border-r border-slate-800 bg-slate-950 px-3 py-5 text-slate-300">
-      <Link className="mb-9 flex items-center gap-3 px-3 text-white" href="/user">
+      <Link className="mb-9 flex items-center gap-3 px-3 text-white" href="/transaction">
         <span className="flex size-9 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-950/40">
           <CandlestickChart className="size-5" />
         </span>
@@ -92,7 +92,7 @@ export function UserSidebar() {
 
       <p className="mb-2 px-3 text-xs font-medium tracking-wider text-slate-500">工作台</p>
       <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto">
-        {navigation.map((item) => {
+        {navigation.filter((item) => !item.adminOnly || user?.role === "ADMIN").map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
@@ -122,7 +122,7 @@ export function UserSidebar() {
               </Avatar>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium text-slate-100">{username}</span>
-                <span className="block truncate text-xs text-slate-500">{user?.email ?? "正在加载账户信息"}</span>
+                <span className="block truncate text-xs text-slate-500">{user?.role === "ADMIN" ? "管理员" : user ? "普通用户" : "正在加载账户信息"}</span>
               </span>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -136,7 +136,7 @@ export function UserSidebar() {
               <DropdownMenuGroup>
                 <DropdownMenuLabel>
                   <span className="block text-sm text-foreground">{username}</span>
-                  <span className="block truncate text-xs font-normal text-muted-foreground">{user?.email}</span>
+                  <span className="block truncate text-xs font-normal text-muted-foreground">{user?.role === "ADMIN" ? "管理员" : "普通用户"}</span>
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />

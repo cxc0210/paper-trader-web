@@ -1,10 +1,13 @@
 import { http } from "@/lib/http";
 
+export type UserRole = "ADMIN" | "USER";
+
 export type CurrentUser = {
   id: number;
   username: string;
   email: string;
   phone: string | null;
+  role: UserRole;
 };
 
 export type UserPage = {
@@ -20,12 +23,14 @@ export type CreateUserRequest = {
   password: string;
   email: string;
   phone: string | null;
+  role: UserRole;
 };
 
 export type UpdateUserRequest = {
   username: string;
   email: string;
   phone: string | null;
+  role: UserRole;
 };
 
 export function getCurrentUser() {

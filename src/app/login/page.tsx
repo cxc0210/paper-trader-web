@@ -29,8 +29,8 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      await login({ email, password });
-      router.replace("/user");
+      const response = await login({ email, password });
+      router.replace(response.user.role === "ADMIN" ? "/user" : "/transaction");
     } catch (error) {
       setError(getErrorMessage(error));
     } finally {
